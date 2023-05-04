@@ -2,71 +2,68 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/url"
+	"os"
+
+	"github.com/spf13/cobra"
 )
 
-type HorizonsAPI struct {
-	Format     string
-	Command    string
-	ObjData    string
-	MakeEphem  string
-	EphemType  string
-	Center     string
-	StartTime  string
-	StopTime   string
-	StepSize   string
-	Quantities string
-}
+func run() {
+	var format string
+	var command string
+	var objData string
+	var makeEphem string
+	var ephemType string
+	var center string
+	var startTime string
+	var stopTime string
+	var stepSize string
+	var quantities string
 
-func (api *HorizonsAPI) createURL() string {
-	baseURL := "https://ssd.jpl.nasa.gov/api/horizons.api"
-	params := url.Values{}
-	params.Set("format", api.Format)
-	params.Set("COMMAND", api.Command)
-	params.Set("OBJ_DATA", api.ObjData)
-	params.Set("MAKE_EPHEM", api.MakeEphem)
-	params.Set("EPHEM_TYPE", api.EphemType)
-	params.Set("CENTER", api.Center)
-	params.Set("START_TIME", api.StartTime)
-	params.Set("STOP_TIME", api.StopTime)
-	params.Set("STEP_SIZE", api.StepSize)
-	params.Set("QUANTITIES", api.Quantities)
-	return fmt.Sprintf("%s?%s", baseURL, params.Encode())
-}
+	rootCmd := &cobra.Command{
+		Use:   "horizons",
+		Short: "Download data from the NASA Horizons system",
+		Run: func(cmd *cobra.Command, args []string) {
+			api := &HorizonsAPI{
+				Format:     format,
+				Command:    command,
+				ObjData:    objData,
+				MakeEphem:  makeEphem,
+				EphemType:  ephemType,
+				Center:     center,
+				StartTime:  startTime,
+				StopTime:   stopTime,
+				StepSize:   stepSize,
+				Quantities: quantities,
+			}
 
-func (api *HorizonsAPI) download() ([]byte, error) {
-	url := api.createURL()
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, err
+			response, err := api.download()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error downloading data: %s\n", err)
+				os.Exit(1)
+			}
+
+			fmt.Println(string(response))
+		},
 	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return body, nil
-}
 
+	rootCmd.Flags().StringVarP(&format, "format", "f", "text", "Output format")
+	rootCmd.Flags().StringVarP(&command, "command", "c", "", "Horizons command")
+	rootCmd.Flags().StringVarP(&objData, "obj-data", "o", "YES", "Include object data")
+	rootCmd.Flags().StringVarP(&makeEphem, "make-ephem", "e", "YES", "Generate ephemerides")
+	rootCmd.Flags().StringVarP(&ephemType, "ephem-type", "t", "OBSERVER", "Ephemeris type")
+	rootCmd.Flags().StringVarP(&center, "center", "r", "'500@399'", "Observation center")
+	rootCmd.Flags().StringVarP(&startTime, "start-time", "s", "", "Start time (ISO 8601 format)")
+	rootCmd.Flags().StringVarP(&stopTime, "stop-time", "x", "", "Stop time (ISO 8601 format)")
+	rootCmd.Flags().StringVarP(&stepSize, "step-size", "p", "1 d", "Step size")
+	rootCmd.Flags().StringVarP(&quantities, "quantities", "q", "", "Output quantities")
+
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error executing command: %s\n", err)
+		os.Exit(1)
+	}
+}
 func main() {
-	api := &HorizonsAPI{
-		Format:     "text",
-		Command:    "'499'",
-		ObjData:    "'YES'",
-		MakeEphem:  "'YES'",
-		EphemType:  "'OBSERVER'",
-		Center:     "'500@399'",
-		StartTime:  "'2006-01-01'",
-		StopTime:   "'2006-01-20'",
-		StepSize:   "'1 d'",
-		Quantities: "'1,9,20,23,24,29'",
-	}
-	data, err := api.download()
-	if err != nil {
-		fmt.Printf("Error: %s\n", err)
-		return
-	}
-	fmt.Printf("Data:\n%s\n", data)
+
+	run()
+
 }
