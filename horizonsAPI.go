@@ -48,16 +48,16 @@ func (api *HorizonsAPI) createURL() string {
 	baseURL := "https://ssd.jpl.nasa.gov/api/horizons.api"
 
 	params := url.Values{}
-	params.Set("format", api.Format)
-	params.Set("COMMAND", api.Command)
-	params.Set("OBJ_DATA", api.ObjData)
-	params.Set("MAKE_EPHEM", api.MakeEphem)
-	params.Set("EPHEM_TYPE", api.EphemType)
-	params.Set("CENTER", api.Center)
-	params.Set("START_TIME", api.StartTime)
-	params.Set("STOP_TIME", api.StopTime)
+	params.Set("format", encodeReservedCharacters(api.Format))
+	params.Set("COMMAND", encodeReservedCharacters(api.Command))
+	params.Set("OBJ_DATA", encodeReservedCharacters(api.ObjData))
+	params.Set("MAKE_EPHEM", encodeReservedCharacters(api.MakeEphem))
+	params.Set("EPHEM_TYPE", encodeReservedCharacters(api.EphemType))
+	params.Set("CENTER", encodeReservedCharacters(api.Center))
+	params.Set("START_TIME", encodeReservedCharacters(api.StartTime))
+	params.Set("STOP_TIME", encodeReservedCharacters(api.StopTime))
 	params.Set("STEP_SIZE", encodeReservedCharacters(api.StepSize))
-	params.Set("QUANTITIES", api.Quantities)
+	params.Set("QUANTITIES", encodeReservedCharacters(api.Quantities))
 
 	return fmt.Sprintf("%s?%s", baseURL, params.Encode())
 }
