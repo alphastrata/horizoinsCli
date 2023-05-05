@@ -65,8 +65,6 @@ func (api *HorizonsAPI) createURL() string {
 func (api *HorizonsAPI) download() ([]byte, error) {
 	url := api.createURL()
 
-	fmt.Println(url)
-
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err

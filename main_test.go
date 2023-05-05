@@ -11,13 +11,13 @@ func TestHorizonsAPI_download(t *testing.T) {
 		Format:     "text",
 		Command:    "499",
 		ObjData:    "YES",
-		MakeEphem:  "YES",
+		MakeEphem:  "NO",
 		EphemType:  "OBSERVER",
 		Center:     "500@399",
 		StartTime:  "2006-01-01",
 		StopTime:   "2006-01-20",
 		StepSize:   "1%20d",
-		Quantities: "1,9,20",
+		Quantities: "QUANTITIES='29'",
 	}
 
 	// Make the API call and check that the response matches the expected response
@@ -27,3 +27,5 @@ func TestHorizonsAPI_download(t *testing.T) {
 	}
 	fmt.Println(string(actualResponse))
 }
+
+// format=text&COMMAND='499'&OBJ_DATA='YES'&MAKE_EPHEM='YES'&EPHEM_TYPE='OBSERVER'&CENTER='500@399'&START_TIME='2006-01-01'&STOP_TIME='2006-01-20'&STEP_SIZE='1%20d'&QUANTITIES='1,9,20,23,24,29'
